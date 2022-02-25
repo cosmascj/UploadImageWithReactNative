@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { useEffect, useState } from "react";
 import AppButton from "./components/Button";
 import * as ImagePicker from "expo-image-picker";
+import client from "./apiService/client";
 
 export default function App(props) {
   const [profileImage, SetProfileImage] = useState("");
@@ -31,8 +32,29 @@ export default function App(props) {
     }
   };
 
-  const upLoadProfileImage = () => {
-    console.log(profileImage);
+  const upLoadProfileImage = async () => {
+    const formData = new FormData();
+    formData.append("photosss", {
+      name: new Date() + "_photos",
+      uri: profileImage,
+      type: "image/jpg",
+    });
+    console.log(formData);
+    //console.log(profileImage);
+
+    try {
+      const res = await client.post("/upload", formData, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+          authorization:
+            "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsZXBlYWNlZHVkZUBvdXRsb29rLmNvbSIsImlkIjoxLCJleHAiOjE2NTczMDU5MDcsImlhdCI6MTYyNTc2NTkwN30.- k0DKX45OZ7FSSitwebMULKONwGXfOQt0Uev1uoylXatT_zdCn7Lw0xVML - 0748sMxllP52IYe0pB2JK - dtuRA",
+        },
+      });
+      // console.log(res.status);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <View style={styles.container}>
