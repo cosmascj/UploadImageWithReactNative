@@ -13,8 +13,9 @@ const AppButton = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 0,
     justifyContent: "center",
+    alignItems: "center",
   },
   ButtonView: {
     width: 125,
@@ -23,6 +24,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 125 / 2,
     borderStyle: "dashed",
+    // backgroundColor: "orange",
     borderWidth: 1,
   },
   innerText: {
