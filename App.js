@@ -1,13 +1,17 @@
 import React from "react";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { useEffect, useState } from "react";
-import AppButton from "./components/Button";
 import * as ImagePicker from "expo-image-picker";
 import client from "./apiService/client";
+import axios, { Axios } from "axios";
 
-export default function App(props) {
-  const [profileImage, SetProfileImage] = useState("");
+const App = (props) => {
+  const BASEURL = axios.create({
+    baseURL: "https://darot-image-upload-service.herokuapp.com/api/v1",
+  });
+  const url = "https://darot-image-upload-service.herokuapp.com/api/v1/upload";
+
+  const [profileImage, setProfileImage] = useState("");
 
   const openImageLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -20,38 +24,33 @@ export default function App(props) {
     if (status === "granted") {
       const response = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
+        allowsEditing: false,
       });
 
       if (!response.cancelled) {
-        SetProfileImage(response.uri);
+        setProfileImage(response.uri);
       }
       console.log(response);
+      console.log(profileImage);
     }
   };
 
   const upLoadProfileImage = async () => {
     const formData = new FormData();
-    formData.append("photosss", {
-      name: new Date() + "_photos",
-      uri: profileImage,
-      type: "image/jpg",
+    formData.append("fileId", {
+      file: profileImage,
+      fileType: "image/png",
     });
-    console.log(formData);
-    //console.log(profileImage);
-
+    console.log(profileImage);
+    //console.log(formData);
     try {
-      const res = await client.post("/upload", formData, {
+      const res = await client.post("/api/v1/upload", formData, {
         headers: {
           Accept: "application/json",
           "Content-Type": "multipart/form-data",
-          authorization:
-            "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsZXBlYWNlZHVkZUBvdXRsb29rLmNvbSIsImlkIjoxLCJleHAiOjE2NTczMDU5MDcsImlhdCI6MTYyNTc2NTkwN30.- k0DKX45OZ7FSSitwebMULKONwGXfOQt0Uev1uoylXatT_zdCn7Lw0xVML - 0748sMxllP52IYe0pB2JK - dtuRA",
         },
       });
-      // console.log(res.status);
+      console.log(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -66,12 +65,11 @@ export default function App(props) {
               style={{
                 height: "100%",
                 width: "100%",
-                // resizeMode: "contain",
                 borderRadius: 50,
               }}
             />
           ) : (
-            <Text style={styles.innerText}>Profile Image</Text>
+            <Text style={styles.placeholderText}>Profile Image</Text>
           )}
         </TouchableOpacity>
 
@@ -86,7 +84,7 @@ export default function App(props) {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -109,9 +107,10 @@ const styles = StyleSheet.create({
     borderWidth: 0.9,
     overflow: "hidden",
   },
-  innerText: {
+  placeholderText: {
     opacity: 0.5,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
 });
+export default App;
