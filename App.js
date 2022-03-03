@@ -4,21 +4,26 @@ import { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import client from "./apiService/client";
 import axios, { Axios } from "axios";
+import { launchImageLibrary } from "react-native-image-picker";
 
 const App = (props) => {
   const BASEURL = axios.create({
     baseURL: "https://darot-image-upload-service.herokuapp.com/api/v1",
   });
   const url = "https://darot-image-upload-service.herokuapp.com/api/v1/upload";
+  // const url = "https://clads-service.herokuapp.com/api/v1/customer/register";
+  //const url = "https://jsonplaceholder.typicode.com/photos";
 
-  const [profileImage, setProfileImage] = useState("");
+  const [profileImage, setProfileImage] = useState(" ");
 
   const openImageLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // const { status } = await ImagePicker.launchImageLibrary();
 
     // console.log(reponse);
     if (status !== "granted") {
       alert("sorry permission not granted");
+      return;
     }
 
     if (status === "granted") {
@@ -26,13 +31,59 @@ const App = (props) => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
       });
-
-      if (!response.cancelled) {
-        setProfileImage(response.uri);
-      }
       console.log(response);
-      console.log(profileImage);
+      if (!response.cancelled) {
+        await setProfileImage(response.uri);
+
+        // await console.log(profileImage);
+      }
+      // console.log(response);
+      // console.log(profileImage);
     }
+  };
+
+  const pushData = async () => {
+    const formData = new FormData();
+    const newImageUri = "file:///" + profileImage.split("file:/").join("");
+
+    // formData.append("file", {
+    //   uri: profileImage,
+    //   type: "image/jpeg",
+    // });
+
+    formData.append("file", {
+      uri: profileImage,
+
+      name: "image",
+
+      type: "image/jpg",
+    });
+
+    // console.log(formData);
+    //console.log(profileImage);
+
+    // await axios
+    //   .post(url, formData)
+    //   .then((res) => {
+    //     console.log(res.data);
+    //   })
+    //   .catch((error) => console.log(error));
+
+    fetch(url, {
+      method: "POST",
+
+      body: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+      .then((r) => r.json())
+
+      .then((data) => {
+        console.log(data);
+      })
+
+      .catch((err) => console.log(err));
   };
 
   const upLoadProfileImage = async () => {
@@ -55,6 +106,7 @@ const App = (props) => {
       console.log(error);
     }
   };
+
   return (
     <View style={styles.container}>
       <View>
@@ -76,7 +128,7 @@ const App = (props) => {
         {profileImage ? (
           <TouchableOpacity
             style={{ marginTop: 20, backgroundColor: "green", borderRadius: 7 }}
-            onPress={upLoadProfileImage}
+            onPress={pushData}
           >
             <Text style={{ alignSelf: "center" }}>Upload</Text>
           </TouchableOpacity>
